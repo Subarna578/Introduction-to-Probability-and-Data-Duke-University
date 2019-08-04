@@ -1,0 +1,147 @@
+---
+title: "Exploring the BRFSS data"
+output: 
+  html_document: 
+    fig_height: 4
+    highlight: pygments
+    theme: spacelab
+---
+
+## Setup
+
+### Load packages
+
+```{r load-packages, message = FALSE}
+library(ggplot2)
+library(dplyr)
+```
+
+### Load data
+
+```{r load-data}
+load("brfss2013.RData")
+```
+
+
+
+* * *
+
+## Part 1: Data
+The behavioral Risk Factor Surveillance System (BRFSS) is a collaborative project between all of the states in the United States( US) and participating US territories and the Centers for Disease Control and Prevention (CDC). It's major objective is to collect uniform, state-specific data on preventive health practices and risk behaviors that are linked to chronic diseases, injuries, and preventable infectious diseases that affect the adult population.
+        Now we will dive into some important aspects of our data.
+
+1) **What is our data about**?
+
+ Answer: Our data is a complete survey conducted by BRFSS regarding the health status of the adult US citizens and their health related issues. This data "brfss2013" provides the data of *491775* patients and total of *330* variables are used as a metrics for evaluation. Actually, the whole population was taken into account, however, this data provides information for the US adult citizens. Hence, a sample is taken.
+
+2) **Why is this data collected**?
+
+ Answer: This data is helpful for BRFSS for studying and analysing several factors that are responsible for ill-health of adult US citizens and to draw the meaningful insights from these data.
+ 
+3) **Mode of data collection**:
+
+  This data is conducted through survey. The survey was taken using landline telephone and cellular telephone.
+    
+  a) *During landline telephone survey*, interviewers collected data from a randomly selected adult in a household. Disproportionate stratified sampling (DSS) has been used for the landline sample.
+    
+  b) *During cellular telephone survey*, interviewers collected data from an adult who participates by using a cellular telephone and resided in a private residence or college housing. The sample is randomly generated from a sampling frame of confirmed cellular area.
+    
+###Scope of inference
+
+While talking about scope of inference, the BRFSS study is of observational nature which employs stratified design based on random sampling.
+Also, the survey must be generic to all non-institutionalized adults (18 or more). This whole survey is a complete experimental study.
+
+That's it. Now we are delving to our part 2 which is research queries.
+
+* * *
+
+## Part 2: Research questions
+
+**Research quesion 1:**
+
+One of the first research question involves how sleeptime of an US citizen have any affects on chronic health condition specifically depressive disorder, specifically for those category of people who sleep for less than 5 hours.
+
+**Research quesion 2:**
+
+My next research question involves seeing the relativity of the US citiznes who have smoked at least 100 cigarettes, had any asthama related issues, and had other types of cancers too.
+
+
+**Research quesion 3:**
+
+Third research question is releated to mental support based on gender. There are many issues related to mentality in US that we get to hear via News. So, I want to know if male get higher mental support and care than female or vice-versa or maybe equal.
+
+* * *
+
+## Part 3: Exploratory data analysis
+
+
+
+**Research quesion 1:**
+
+```{r}
+sl_dep <- brfss2013 %>%
+  filter(!is.na(sleptim1),!is.na(addepev2)) %>%
+  select(sleptim1,addepev2)
+  
+up_dep<- sl_dep %>%
+  filter(sleptim1<5) %>%
+  group_by(addepev2) %>%
+  summarise(count=n())
+up_dep
+
+ggplot(data=up_dep,aes(x=addepev2,y=count))+geom_bar(stat="identity",color='blue',fill='green')+xlab("Depressive Order for people having <5 hours of sleep?")+ylab("Number of US citizens ")
+```
+
+**From the bar diagram**, we can see that people not having depressive order even after having less than five hours of sleep is more than people having depressive order under same condition which is I found, quite, ***astounding***. This can visualise us an image that sleeping disorder has less influence on depression. But again, we cannot explicitly say that since it can be influenced by many other health factors.
+
+
+
+
+
+**Research Question 2:**
+
+
+```{r}
+sm_ascr <- brfss2013 %>%
+  filter(!is.na(smoke100),!is.na(asthma3),!is.na(chcocncr)) %>%
+  select(smoke100,asthma3,chcocncr)
+
+sm_ascr<- sm_ascr %>%
+  mutate(allyes= ifelse(smoke100=="Yes"& asthma3=="Yes" & chcocncr=="Yes","Yes","No"))
+
+all_yes<-sm_ascr %>%
+  group_by(allyes) %>%
+  summarise(count=n())
+ggplot(data=all_yes,aes(x=allyes,y=count))+geom_bar(stat='identity')+xlab("Smoking+Asthma+Cancer")+ylab("Number of US Citizens")
+
+
+```
+
+
+From the graph, we can say that those people who had smoked at least 100 times, had asthama too, and cancer related complications **are very less** compared to those that donot have all these. From here, we can estimate that there are very, very less people who are bounded with all these critical health problems. From this, we can also guess that asthma and cancer are not really caused by smoking. But again, we can't explicitly say anything since the sample can be influenced by many factors such as habitat, financial status and many more.
+
+
+**Research quesion 3:**
+
+```{r}
+life<- brfss2013 %>%
+  filter(!is.na(lsatisfy),!is.na(emtsuprt),!is.na(cadult)) %>%
+  select(lsatisfy,emtsuprt,cadult)
+life <- life %>%
+  mutate(male= ifelse(cadult=="Yes, male respondent",1,0))
+gender_supp<- life %>%
+  filter(lsatisfy=="Very satisfied" & emtsuprt=="Always") %>%
+  group_by(male) %>%
+  summarise(count=n())
+val=c("Female","Male")
+ggplot(data=gender_supp,aes(x=male,y=count,col=val))+geom_bar(stat='identity',fill='yellow')
+
+```
+
+**From the bar graph**, we can clearly see that the number of males and females are approximately equal. From this visualisation, we can , to a certain extent say that, male and female in US states get equal emotional support. However, this is only acceptable form for the data collected by BRFSS. It cannot be generalised to the whole population. This can be influenced by many external factors.
+
+ **© Subarna Lamsal**
+ 
+ **All Rights Reserved**
+ 
+ **August 05, 2019**
