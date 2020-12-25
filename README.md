@@ -4,7 +4,7 @@ This project contains the weekly solutions of the online course "Introduction to
 Programming Language Used: R
 
 
-Don't forget to give a star on this repo.
+# Don't forget to give a star on this repo.
 
 Thanks,
 Subarna578
